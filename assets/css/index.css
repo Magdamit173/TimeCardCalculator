@@ -6,6 +6,15 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 
+*::-webkit-scrollbar {
+    width: 10px;
+    background-color: rgb(250, 241, 230);
+}
+*::-webkit-scrollbar-thumb {
+    background-color: rgb(235, 193, 142);
+    border-radius: 10px;
+}
+
 body {
     display: flex;
     justify-content: center;
@@ -19,6 +28,8 @@ body {
     height: 100dvh;
     flex-basis: 50%;
     background-color: bisque;
+
+    overflow-y: scroll;
 }
 .time_component {
     display: flex;
@@ -65,7 +76,29 @@ body {
     background-color: rgb(250, 241, 230);
 }
 
-.increment_component {
+.username {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgb(250, 241, 230);
+    border: solid 2px bisque;
+    color: black;
+    text-shadow: 1px 1px 1px white;
+    text-align: center;
+    padding: 10px;
+    margin: 15px;
+    width: 40dvw;
+    max-width: 400px;
+    border-radius: 10px;
+    font-size: 1.1em;
+    outline: none;
+}
+.username::placeholder {
+    color: rgba(128, 128, 128, 0.692);
+}
+
+.increment_component, .free_up_space {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -73,6 +106,7 @@ body {
     background-color: bisque;
     color: rgb(250, 241, 230);
     text-shadow: 1px 1px 1px black;
+    text-align: center;
     padding: 10px;
     margin: 15px;
     width: 40dvw;

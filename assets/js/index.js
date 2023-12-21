@@ -3,6 +3,8 @@ const mutationObserver = new MutationObserver(entries => {
 })
 const time_container = document.querySelector("[data-time_container]")
 const display_monitor = document.querySelector("[data-display_monitor]")
+const username = document.querySelector("[data-username]")
+const free_up_space = document.querySelector("[data-free_up_space]")
 
 function timeToSeconds(time) {
   var timeArray = time.split(':')
@@ -20,29 +22,70 @@ function sumOverallHours() {
 }
 
 function displayHours(float) {
-  display_monitor.textContent = `"Hours: ${float}"`
+  display_monitor.textContent = `Overall Hours: ${parseFloat(float.toFixed(7))}`
 }
 
+function saveComponents() {
+  const componentsData = []
 
-function timeComponent() {
+  function timeStampTemplate(seconds, start_timestamp, end_timestamp) {
+    const template = {
+      "seconds": seconds,
+      "start_timestamp": start_timestamp,
+      "end_timestamp": end_timestamp
+    }
+    return template
+  }
+  
+  Array.from(time_container.children).forEach(component => {
+    componentsData.push(timeStampTemplate(component.getAttribute("data-seconds"), component.getAttribute("data-start_timestamp"), component.getAttribute("data-end_timestamp")))
+  })
+
+  localStorage.setItem(username.value.trim() || "username", JSON.stringify(componentsData))
+}
+
+function loadComponents() {
+  let componentsData = localStorage.getItem(username.value.trim() || "username")
+  if (!componentsData) return
+
+  Array.from(JSON.parse(componentsData)).forEach(componentData => {
+    time_container.append(timeComponent(componentData.seconds, componentData.start_timestamp, componentData.end_timestamp))
+  })
+}
+
+function clearComponents() {
+  Array.from(time_container.children).forEach(component => {
+    component.remove()
+  })
+}
+
+function clearStorage() {
+  localStorage.clear()
+}
+
+function timeComponent(seconds, start_timestamp, end_timestamp) {
   const component = document.createElement("div")
-  component.setAttribute("class","time_component")
-  component.setAttribute("data-time_component","")
-  component.setAttribute("data-seconds","0")
+  component.setAttribute("class", "time_component")
+  component.setAttribute("data-time_component", "")
+  component.setAttribute("data-seconds", seconds || "0")
+  component.setAttribute("data-start_timestamp", start_timestamp || "0")
+  component.setAttribute("data-end_timestamp", end_timestamp || "0")
 
   const start_property = document.createElement("input")
   start_property.type = "time"
-  start_property.setAttribute("class","start")
-  start_property.setAttribute("data-start","")
+  start_property.setAttribute("class", "start")
+  start_property.setAttribute("data-start", "")
+  start_property.value = start_timestamp || 0
 
   const end_property = document.createElement("input")
   end_property.type = "time"
-  end_property.setAttribute("class","end")
-  end_property.setAttribute("data-end","")
+  end_property.setAttribute("class", "end")
+  end_property.setAttribute("data-end", "")
+  end_property.value = end_timestamp || 0
 
   const destroy_property = document.createElement("div")
-  destroy_property.setAttribute("class","time_destroy")
-  destroy_property.setAttribute("data-time_destroy","")
+  destroy_property.setAttribute("class", "time_destroy")
+  destroy_property.setAttribute("data-time_destroy", "")
   destroy_property.textContent = "-"
 
   component.append(start_property)
@@ -52,32 +95,64 @@ function timeComponent() {
   function setSeconds(float) {
     component.setAttribute("data-seconds", float)
   }
-  function onChangeSeconds() {
-    return timeToSeconds(end_property.value) -  timeToSeconds(start_property.value)
+  function setStartTimeStamp() {
+    component.setAttribute("data-start_timestamp", start_property.value)
+  }
+  function setEndTimeStamp() {
+    component.setAttribute("data-end_timestamp", end_property.value)
   }
 
+  function onChangeSeconds() {
+    return timeToSeconds(end_property.value) - timeToSeconds(start_property.value)
+  }
 
-  start_property.addEventListener("change",() => {
+  start_property.addEventListener("change", () => {
+    setStartTimeStamp(start_property.value)
     setSeconds(onChangeSeconds())
     displayHours(sumOverallHours())
+
+    saveComponents()
   })
-  end_property.addEventListener("change",() => {
+  end_property.addEventListener("change", () => {
+    setEndTimeStamp()
     setSeconds(onChangeSeconds())
     displayHours(sumOverallHours())
+
+    saveComponents()
   })
 
   destroy_property.addEventListener("click", () => {
     component.remove()
     displayHours(sumOverallHours())
+
+    saveComponents()
   })
 
   return component
 }
 
-document.querySelector("[data-increment_component]").addEventListener("click", () => {
-  const time_container = document.querySelector("[data-time_container]")
-  time_container.append(timeComponent())
+free_up_space.addEventListener("click", () => {
+  if(!confirm("Clear Every Usernames?")) return
+  clearComponents()
+  clearStorage()
 })
+username.addEventListener("keyup", () => {
+  clearComponents()
+  loadComponents()
+  displayHours(sumOverallHours())
+})
+
+
+document.querySelector("[data-increment_component]").addEventListener("click", () => {
+  time_container.append(timeComponent())
+
+  saveComponents()
+})
+
+window.onload = () => {
+  loadComponents()
+  displayHours(sumOverallHours())
+}
 
 
 // mutationObserver.observe(time_container, {
