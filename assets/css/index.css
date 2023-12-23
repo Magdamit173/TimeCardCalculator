@@ -2,7 +2,7 @@
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-    
+
     font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -10,6 +10,7 @@
     width: 10px;
     background-color: rgb(250, 241, 230);
 }
+
 *::-webkit-scrollbar-thumb {
     background-color: rgb(235, 193, 142);
     border-radius: 10px;
@@ -31,10 +32,12 @@ body {
 
     overflow-y: scroll;
 }
+
 .time_component {
     display: flex;
     justify-content: space-around;
     align-items: center;
+    flex-wrap: wrap;
 
     margin: 10px;
     padding: 10px;
@@ -42,15 +45,36 @@ body {
     border-radius: 10px;
 }
 
-.time_component > input {
+.time_component>input {
     display: flex;
     justify-content: center;
     align-items: center;
 
+    min-width: 200px;
     outline: none;
     border: 0;
+    background-color: bisque;
+    text-align: center;
+    border-radius: 5px;
+    border: solid 1px rgb(172, 125, 125);
+}
 
-    width: 40%;
+.time_label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    aspect-ratio: 1/1;
+    height: 30px;
+    border-radius: 10px;
+    background-color: aliceblue !important;
+    font-size: .9em !important;
+    border: solid 1px bisque !important;
+    color: black !important;
+}
+
+.time_label::placeholder {
+    color: rgba(255, 228, 196, 0.1) !important;
 }
 
 .time_destroy {
@@ -61,8 +85,19 @@ body {
     aspect-ratio: 1/1;
     height: 30px;
     border-radius: 10px;
-    background-color: bisque;
-    font-size: 1.7em;
+    background-color: rgba(255, 0, 0, 0.65);
+    font-size: .9em !important;
+}
+
+.time_component>* {
+    flex-grow: 1;
+    margin: 5px;
+
+    padding: 10px;
+    width: 40%;
+    font-size: 1.2em;
+    color: white;
+    text-shadow: 1px 1px 1px gray;
 }
 
 .time_monitor {
@@ -94,24 +129,27 @@ body {
     font-size: 1.1em;
     outline: none;
 }
+
 .username::placeholder {
     color: rgba(128, 128, 128, 0.692);
 }
 
-.increment_component, .free_up_space {
+.increment_component,
+.free_up_space {
     display: flex;
     justify-content: center;
     align-items: center;
 
     background-color: bisque;
-    color: rgb(250, 241, 230);
-    text-shadow: 1px 1px 1px black;
+    color: black;
+    text-shadow: 1px 1px 1px brown;
     text-align: center;
     padding: 10px;
     margin: 15px;
     width: 40dvw;
     max-width: 400px;
     border-radius: 10px;
+    border: solid 1px rgb(162, 92, 85);
 }
 
 .display_monitor {
@@ -121,8 +159,8 @@ body {
 
     background-color: rgb(250, 241, 230);
     border: solid 2px bisque;
-    color: bisque;
-    text-shadow: 1px 1px 1px black;
+    color: black;
+    text-shadow: 1px 1px 1px brown;
     padding: 10px;
     margin: 15px;
     width: 40dvw;

@@ -28,9 +28,10 @@ function displayHours(float) {
 function saveComponents() {
   const componentsData = []
 
-  function timeStampTemplate(seconds, start_timestamp, end_timestamp) {
+  function timeStampTemplate(seconds, label, start_timestamp, end_timestamp) {
     const template = {
       "seconds": seconds,
+      "label": label,
       "start_timestamp": start_timestamp,
       "end_timestamp": end_timestamp
     }
@@ -38,7 +39,7 @@ function saveComponents() {
   }
   
   Array.from(time_container.children).forEach(component => {
-    componentsData.push(timeStampTemplate(component.getAttribute("data-seconds"), component.getAttribute("data-start_timestamp"), component.getAttribute("data-end_timestamp")))
+    componentsData.push(timeStampTemplate(component.getAttribute("data-seconds"), component.getAttribute("data-label"), component.getAttribute("data-start_timestamp"), component.getAttribute("data-end_timestamp")))
   })
 
   localStorage.setItem(username.value.trim() || "username", JSON.stringify(componentsData))
@@ -49,7 +50,7 @@ function loadComponents() {
   if (!componentsData) return
 
   Array.from(JSON.parse(componentsData)).forEach(componentData => {
-    time_container.append(timeComponent(componentData.seconds, componentData.start_timestamp, componentData.end_timestamp))
+    time_container.append(timeComponent(componentData.seconds, componentData.label, componentData.start_timestamp, componentData.end_timestamp))
   })
 }
 
@@ -63,13 +64,14 @@ function clearStorage() {
   localStorage.clear()
 }
 
-function timeComponent(seconds, start_timestamp, end_timestamp) {
+function timeComponent(seconds, label, start_timestamp, end_timestamp) {
   const component = document.createElement("div")
   component.setAttribute("class", "time_component")
   component.setAttribute("data-time_component", "")
   component.setAttribute("data-seconds", seconds || "0")
   component.setAttribute("data-start_timestamp", start_timestamp || "0")
   component.setAttribute("data-end_timestamp", end_timestamp || "0")
+  component.setAttribute("data-label", label || "")
 
   const start_property = document.createElement("input")
   start_property.type = "time"
@@ -86,14 +88,25 @@ function timeComponent(seconds, start_timestamp, end_timestamp) {
   const destroy_property = document.createElement("div")
   destroy_property.setAttribute("class", "time_destroy")
   destroy_property.setAttribute("data-time_destroy", "")
-  destroy_property.textContent = "-"
+  destroy_property.textContent = "remove"
+
+  const label_property = document.createElement("input")
+  label_property.setAttribute("class", "time_label")
+  label_property.setAttribute("data-time_label", "")
+  label_property.value = label || ""
+  label_property.placeholder = `label`
+  label_property.setAttribute("spellcheck", false)
 
   component.append(start_property)
   component.append(end_property)
+  component.append(label_property)
   component.append(destroy_property)
 
   function setSeconds(float) {
     component.setAttribute("data-seconds", float)
+  }
+  function setLabel() {
+    component.setAttribute("data-label", label_property.value)
   }
   function setStartTimeStamp() {
     component.setAttribute("data-start_timestamp", start_property.value)
@@ -121,7 +134,15 @@ function timeComponent(seconds, start_timestamp, end_timestamp) {
     saveComponents()
   })
 
-  destroy_property.addEventListener("click", () => {
+  label_property.addEventListener("keyup", () => {
+    setLabel(label_property.value)
+    
+    saveComponents()
+  })
+
+  destroy_property.addEventListener("click", (e) => {
+    if(!confirm(`Removing Component: ${e.target.parentElement.getAttribute("data-label")}`)) return
+
     component.remove()
     displayHours(sumOverallHours())
 
