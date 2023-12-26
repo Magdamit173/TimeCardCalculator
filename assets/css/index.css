@@ -142,7 +142,7 @@ body {
 
     background-color: bisque;
     color: black;
-    text-shadow: 1px 1px 1px brown;
+    text-shadow: 1px 1px 1px white;
     text-align: center;
     padding: 10px;
     margin: 15px;
@@ -160,10 +160,68 @@ body {
     background-color: rgb(250, 241, 230);
     border: solid 2px bisque;
     color: black;
-    text-shadow: 1px 1px 1px brown;
+    text-shadow: 1px 1px 1px white;
     padding: 10px;
     margin: 15px;
     width: 40dvw;
     max-width: 400px;
     border-radius: 10px;
+}
+
+.popups {
+    position: fixed;
+}
+
+.popups_wrapper {
+    display: grid;
+    grid-template-areas: "label label" "cancel confirm";
+    grid-template-columns: 1fr 1fr;
+
+    background-color: aliceblue;
+    border-radius: 10px;
+    padding: 10px;
+    max-width: 300px;
+    margin: 10px;
+}
+
+.popups_wrapper > .popup_label {
+    grid-area: label;
+    text-align: center;
+    max-height: 100px;
+    overflow-y: scroll;
+}
+.popups_wrapper > .popup_cancel {
+    grid-area: cancel;
+    
+    color: white;
+    text-shadow: 1px 1px 1px black;
+    background-color: red;
+}
+.popups_wrapper > .popup_confirm {
+    grid-area: confirm;
+
+    color: white;
+    text-shadow: 1px 1px 1px black;
+    background-color: lightgreen;
+}
+
+.popups_wrapper > .popup_misc {
+    grid-area: confirm;
+
+    color: white;
+    text-shadow: 1px 1px 1px black;
+    background-color: bisque;
+}
+
+.popups_wrapper > * {
+    font-size: 1.2em;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+}
+.popups_wrapper > button {
+    border: solid 1px brown;
+}
+.popups_wrapper > button:hover {
+    scale: 1.1;
 }

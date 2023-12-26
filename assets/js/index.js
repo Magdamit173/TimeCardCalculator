@@ -5,6 +5,7 @@ const time_container = document.querySelector("[data-time_container]")
 const display_monitor = document.querySelector("[data-display_monitor]")
 const username = document.querySelector("[data-username]")
 const free_up_space = document.querySelector("[data-free_up_space]")
+const popups = document.querySelector("[data-popups]")
 
 function timeToSeconds(time) {
   var timeArray = time.split(':')
@@ -37,7 +38,7 @@ function saveComponents() {
     }
     return template
   }
-  
+
   Array.from(time_container.children).forEach(component => {
     componentsData.push(timeStampTemplate(component.getAttribute("data-seconds"), component.getAttribute("data-label"), component.getAttribute("data-start_timestamp"), component.getAttribute("data-end_timestamp")))
   })
@@ -63,6 +64,67 @@ function clearComponents() {
 function clearStorage() {
   localStorage.clear()
 }
+
+function confirmPopUp(dialogue, cancelDialogue, confirmDialogue, ...callbackDialogue) {
+  return (async () => {
+    let condition = false
+
+    const popups_wrapper = document.createElement("div")
+    popups_wrapper.setAttribute("class", "popups_wrapper")
+    popups_wrapper.setAttribute("data-popups_wrapper", "")
+
+    const popup_label = document.createElement("div")
+    popup_label.setAttribute("class", "popup_label")
+    popup_label.setAttribute("data-popup_label", "")
+    popup_label.textContent = dialogue || "<empty>"
+
+    const popup_cancel = document.createElement("button")
+    popup_cancel.setAttribute("class", "popup_cancel")
+    popup_cancel.setAttribute("data-popup_cancel", "")
+    popup_cancel.textContent = cancelDialogue || `Cancel`
+
+    const popup_confirm = document.createElement("button")
+    popup_confirm.setAttribute("class", "popup_confirm")
+    popup_confirm.setAttribute("data-popup_confirm", "")
+    popup_confirm.textContent = confirmDialogue || `Confirm`
+
+    popups_wrapper.append(popup_label)
+    popups_wrapper.append(popup_cancel)
+    popups_wrapper.append(popup_confirm)
+
+    popups.append(popups_wrapper)
+
+    callbackDialogue.forEach((callback) => {
+      const popup_misc  = document.createElement("button")
+      popup_misc.setAttribute("class", "popup_misc ")
+      popup_misc.setAttribute("data-popup_misc", "")
+      popup_misc.textContent = `Yes`
+
+      popups_wrapper.append(popup_misc)
+      
+      popup_misc.addEventListener("click", () => {
+        callback()
+        popups_wrapper.remove()
+      })
+    })
+
+    await new Promise(resolve => {
+      popup_cancel.addEventListener("click", () => {
+        condition = false
+        popups_wrapper.remove()
+        resolve()
+      })
+
+      popup_confirm.addEventListener("click", () => {
+        condition = true
+        popups_wrapper.remove()
+        resolve()
+      })
+    })
+    return condition
+  })()
+}
+
 
 function timeComponent(seconds, label, start_timestamp, end_timestamp) {
   const component = document.createElement("div")
@@ -136,12 +198,12 @@ function timeComponent(seconds, label, start_timestamp, end_timestamp) {
 
   label_property.addEventListener("keyup", () => {
     setLabel(label_property.value)
-    
+
     saveComponents()
   })
 
-  destroy_property.addEventListener("click", (e) => {
-    if(!confirm(`Removing Component: ${e.target.parentElement.getAttribute("data-label")}`)) return
+  destroy_property.addEventListener("click",async (e) => {
+    if(!await confirmPopUp(`Removing Component: ${e.target.parentElement.getAttribute("data-label")}`)) return
 
     component.remove()
     displayHours(sumOverallHours())
@@ -152,17 +214,18 @@ function timeComponent(seconds, label, start_timestamp, end_timestamp) {
   return component
 }
 
-free_up_space.addEventListener("click", () => {
-  if(!confirm("Clear Every Usernames?")) return
+free_up_space.addEventListener("click",async () => {
+  if (!await confirmPopUp("Clear Every Usernames?")) return
+  
   clearComponents()
   clearStorage()
 })
+
 username.addEventListener("keyup", () => {
   clearComponents()
   loadComponents()
   displayHours(sumOverallHours())
 })
-
 
 document.querySelector("[data-increment_component]").addEventListener("click", () => {
   time_container.append(timeComponent())
@@ -170,10 +233,21 @@ document.querySelector("[data-increment_component]").addEventListener("click", (
   saveComponents()
 })
 
-window.onload = () => {
+window.onload = async () => {
   loadComponents()
   displayHours(sumOverallHours())
+
+  if (window.innerWidth < 768) {
+    const userAcceptsUnsupported  = await confirmPopUp("Desktop Supported Website, Do You Want To Continue?")
+    if (!userAcceptsUnsupported) {
+      history.back()
+    }
+  }
 }
+
+window.addEventListener("keyup", e => {
+  if(e.key == "/") username.focus()
+})
 
 
 // mutationObserver.observe(time_container, {
