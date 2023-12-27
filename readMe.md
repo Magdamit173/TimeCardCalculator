@@ -1,5 +1,8 @@
 # A TimeCardCalculator
-### --version 0.0.4
+### --version 0.0.5
+
+## Log
+- fix unexpected forwardslash of username
 
 ### How To Use?
 - Username: key to access specific Component Group (using localStorage)

@@ -6,6 +6,7 @@ const display_monitor = document.querySelector("[data-display_monitor]")
 const username = document.querySelector("[data-username]")
 const free_up_space = document.querySelector("[data-free_up_space]")
 const popups = document.querySelector("[data-popups]")
+let active_popup = null
 
 function timeToSeconds(time) {
   var timeArray = time.split(':')
@@ -67,6 +68,8 @@ function clearStorage() {
 
 function confirmPopUp(dialogue, cancelDialogue, confirmDialogue, ...callbackDialogue) {
   return (async () => {
+    if (active_popup) return
+
     let condition = false
 
     const popups_wrapper = document.createElement("div")
@@ -93,15 +96,16 @@ function confirmPopUp(dialogue, cancelDialogue, confirmDialogue, ...callbackDial
     popups_wrapper.append(popup_confirm)
 
     popups.append(popups_wrapper)
+    active_popup = popups_wrapper
 
     callbackDialogue.forEach((callback) => {
-      const popup_misc  = document.createElement("button")
+      const popup_misc = document.createElement("button")
       popup_misc.setAttribute("class", "popup_misc ")
       popup_misc.setAttribute("data-popup_misc", "")
       popup_misc.textContent = `Yes`
 
       popups_wrapper.append(popup_misc)
-      
+
       popup_misc.addEventListener("click", () => {
         callback()
         popups_wrapper.remove()
@@ -110,12 +114,14 @@ function confirmPopUp(dialogue, cancelDialogue, confirmDialogue, ...callbackDial
 
     await new Promise(resolve => {
       popup_cancel.addEventListener("click", () => {
+        active_popup = null
         condition = false
         popups_wrapper.remove()
         resolve()
       })
 
       popup_confirm.addEventListener("click", () => {
+        active_popup = null
         condition = true
         popups_wrapper.remove()
         resolve()
@@ -202,8 +208,8 @@ function timeComponent(seconds, label, start_timestamp, end_timestamp) {
     saveComponents()
   })
 
-  destroy_property.addEventListener("click",async (e) => {
-    if(!await confirmPopUp(`Removing Component: ${e.target.parentElement.getAttribute("data-label")}`)) return
+  destroy_property.addEventListener("click", async (e) => {
+    if (!await confirmPopUp(`Removing Component: ${e.target.parentElement.getAttribute("data-label")}`)) return
 
     component.remove()
     displayHours(sumOverallHours())
@@ -214,9 +220,9 @@ function timeComponent(seconds, label, start_timestamp, end_timestamp) {
   return component
 }
 
-free_up_space.addEventListener("click",async () => {
+free_up_space.addEventListener("click", async () => {
   if (!await confirmPopUp("Clear Every Usernames?")) return
-  
+
   clearComponents()
   clearStorage()
 })
@@ -238,7 +244,7 @@ window.onload = async () => {
   displayHours(sumOverallHours())
 
   if (window.innerWidth < 768) {
-    const userAcceptsUnsupported  = await confirmPopUp("Desktop Supported Website, Do You Want To Continue?")
+    const userAcceptsUnsupported = await confirmPopUp("Desktop Supported Website, Do You Want To Continue?")
     if (!userAcceptsUnsupported) {
       history.back()
     }
@@ -246,7 +252,7 @@ window.onload = async () => {
 }
 
 window.addEventListener("keyup", e => {
-  if(e.key == "/") username.focus()
+  if (e.key == "/" && document.activeElement == document.body) username.focus()
 })
 
 
