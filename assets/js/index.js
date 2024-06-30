@@ -1,12 +1,15 @@
-const mutationObserver = new MutationObserver(entries => {
-  console.log(entries)
-})
+// const mutationObserver = new MutationObserver(entries => {
+//   console.log(entries)
+// })
+
 const time_container = document.querySelector("[data-time_container]")
 const display_monitor = document.querySelector("[data-display_monitor]")
 const username = document.querySelector("[data-username]")
 const free_up_space = document.querySelector("[data-free_up_space]")
 const popups = document.querySelector("[data-popups]")
 let active_popup = null
+let current_component = null
+let hover_component = null
 
 function timeToSeconds(time) {
   var timeArray = time.split(':')
@@ -20,7 +23,14 @@ function secondsToHours(seconds) {
 }
 
 function sumOverallHours() {
-  return secondsToHours(Array.from(time_container.children).reduce((sum, component) => sum + parseFloat(component.getAttribute("data-seconds")), 0))
+  return secondsToHours(Array.from(time_container.children).reduce((sum, component) => {
+    const currentValue = parseFloat(component.getAttribute("data-seconds"))
+    console.log(currentValue)
+    if (currentValue > 0) return sum + currentValue
+    else if (currentValue < 0) return 86400 + (sum + currentValue)
+    else if (isNaN(currentValue) || isNaN(sum)) return sum + 0
+    else return sum + currentValue
+  }, 0))
 }
 
 function displayHours(float) {
@@ -53,6 +63,18 @@ function loadComponents() {
 
   Array.from(JSON.parse(componentsData)).forEach(componentData => {
     time_container.append(timeComponent(componentData.seconds, componentData.label, componentData.start_timestamp, componentData.end_timestamp))
+  })
+
+
+  Array.from(time_container.children).forEach(element => {
+    element.addEventListener("dragover", (event) => {
+      event.preventDefault()
+      hover_component = event.target
+
+      Array.from(event.target.children).forEach(c_element => {
+        c_element.style.pointerEvents = "none"
+      })
+    })
   })
 }
 
@@ -140,6 +162,7 @@ function timeComponent(seconds, label, start_timestamp, end_timestamp) {
   component.setAttribute("data-start_timestamp", start_timestamp || "0")
   component.setAttribute("data-end_timestamp", end_timestamp || "0")
   component.setAttribute("data-label", label || "")
+  component.draggable = true
 
   const start_property = document.createElement("input")
   start_property.type = "time"
@@ -187,6 +210,11 @@ function timeComponent(seconds, label, start_timestamp, end_timestamp) {
     return timeToSeconds(end_property.value) - timeToSeconds(start_property.value)
   }
 
+  component.addEventListener("dragstart", (event) => {
+    console.log("component dragstart")
+    current_component = event.target
+  })
+
   start_property.addEventListener("change", () => {
     setStartTimeStamp(start_property.value)
     setSeconds(onChangeSeconds())
@@ -209,7 +237,7 @@ function timeComponent(seconds, label, start_timestamp, end_timestamp) {
   })
 
   destroy_property.addEventListener("click", async (e) => {
-    if (!await confirmPopUp(`Removing Component: ${e.target.parentElement.getAttribute("data-label")}`)) return
+    // if (!await confirmPopUp(`Removing Component: ${e.target.parentElement.getAttribute("data-label")}`)) return
 
     component.remove()
     displayHours(sumOverallHours())
@@ -219,6 +247,26 @@ function timeComponent(seconds, label, start_timestamp, end_timestamp) {
 
   return component
 }
+
+
+time_container.addEventListener("drop", (event) => {
+  // const clone = current_component.cloneNode()
+  // current_component.remove()
+  event.preventDefault()
+
+  time_container.insertBefore(current_component, hover_component)
+
+  saveComponents()
+
+  Array.from(time_container.children).forEach(element => {
+      Array.from(element.children).forEach(c_element => {
+        c_element.style.pointerEvents = "auto"
+      })
+  })
+
+  current_component = null
+  hover_component = null
+}, true)
 
 free_up_space.addEventListener("click", async () => {
   if (!await confirmPopUp("Clear Every Usernames?")) return

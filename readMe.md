@@ -1,8 +1,8 @@
 # A TimeCardCalculator
-### --version 0.0.5
+### --version 0.0.6
 
 ## Log
-- fix unexpected forwardslash of username
+- added a feature in which components can be reorganize their position
 
 ### How To Use?
 - Username: key to access specific Component Group (using localStorage)
